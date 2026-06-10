@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 const NAVY  = "#1B3A6B";
 const TEAL  = "#4ECDC4";
-const TEAL2 = "#3DBDB4";
 const WHITE = "#FFFFFF";
 const GRAD  = "linear-gradient(135deg,#1B3A6B 0%,#2A5298 60%,#4ECDC4 100%)";
 const C = {
   bg:"#F5F7FA", surface:"#FFFFFF", border:"#E2E8F0", borderMed:"#CBD5E0",
-  text:NAVY, muted:"#4A6280", faint:"#8FA3BC", accentFg:"#FFFFFF",
+  text:NAVY, muted:"#4A6280", faint:"#8FA3BC",
   sand:"#EBF4FF", sandDark:"#D6E8FF",
   green:"#1A5C38", greenBg:"#EBF5EE", greenBorder:"#A8D5B8",
   red:"#C0392B",   redBg:"#FEF2F2",   redBorder:"#FECACA",
@@ -42,48 +41,36 @@ const TYPE_META = {
   panorama:  { color:NAVY, bg:"#EBF4FF", border:"#BFD7FF", icon:"◎", label:"Panorama"  },
 };
 const ACTIVE_Q = [
-  { id:1,  text:"Quel est le taux de TVA standard en France ?",                                                        domain:"fiscal",      options:["18 %","19,6 %","20 %","21 %"],                                                                                        answer:2, points:10, explanation:"Le taux standard de TVA est de 20 % depuis le 1er janvier 2014.", resources:["tva2024"],         optionNotes:["N'a jamais existé en France.","Ancien taux jusqu'en 2013.","✓ Taux actuel.","Taux belge."] },
-  { id:2,  text:"Quel impôt finance principalement la Sécurité sociale ?",                                              domain:"fiscal",      options:["IR","IS","CSG","TVA"],                                                                                                 answer:2, points:10, explanation:"La CSG est le premier prélèvement obligatoire français en volume.", resources:["csgActu"],         optionNotes:["Finance le budget de l'État.","Finance le budget de l'État.","✓ Créée en 1991.","Finance l'État et partiellement la Sécu."] },
-  { id:3,  text:"Durée légale de conservation des bulletins de salaire ?",                                              domain:"social",      options:["3 ans","5 ans","Durée illimitée","10 ans"],                                                                            answer:2, points:10, explanation:"Depuis la loi Travail de 2016, conservation sans limitation de durée.", resources:["paieActu"],        optionNotes:["Délai de prescription.","Délai pour documents comptables.","✓ Illimitée depuis la loi El Khomri.","Certains documents fiscaux."] },
-  { id:4,  text:"Quel est le délai légal de préavis pour un cadre en CDI ?",                                            domain:"social",      options:["1 mois","2 mois","3 mois","6 mois"],                                                                                   answer:2, points:10, explanation:"Le préavis légal pour un cadre en CDI est de 3 mois.", resources:["preavisRH"],       optionNotes:["Non-cadres avec moins de 2 ans.","Agents de maîtrise.","✓ Délai légal pour les cadres.","Possible contractuellement, pas légal."] },
-  { id:5,  text:"De quoi est composé un bilan comptable ?",                                                             domain:"affaires",    options:["Charges et produits","Actif et passif","Recettes et dépenses","Capital et emprunts"],                                    answer:1, points:10, explanation:"Le bilan présente l'actif (ce que possède l'entreprise) et le passif (ce qu'elle doit).", resources:["bilanTuto"],       optionNotes:["= compte de résultat.","✓ Structure du bilan.","= trésorerie.","= composantes du passif uniquement."] },
-  { id:6,  text:"Que signifie l'acronyme EBITDA ?",                                                                     domain:"affaires",    options:["Excédent Brut Indicatif","Earnings Before Interest, Taxes, Depreciation and Amortization","Estimation du Bénéfice","Aucune"], answer:1, points:10, explanation:"L'EBITDA mesure la performance opérationnelle avant financement, fiscalité et amortissements.", resources:["ebitdaPano"], optionNotes:["Traduction inventée.","✓ Définition exacte. En français : EBE.","Paraphrase incorrecte.","La bonne réponse est B."] },
-  { id:7,  text:"Quel est le délai de prescription de l'action en paiement des salaires ?",                             domain:"social",      options:["1 an","2 ans","3 ans","5 ans"],                                                                                        answer:2, points:10, explanation:"L'action en paiement des salaires se prescrit par 3 ans (art. L3245-1 du Code du travail).", resources:["preavisRH"],  optionNotes:["Trop court.","Certains litiges commerciaux.","✓ Art. L3245-1 du Code du travail.","Prescription de droit commun."] },
-  { id:8,  text:"Quelle réglementation encadre la protection des données personnelles en Europe ?",                     domain:"fiscal",      options:["CCPA","RGPD","HIPAA","SOX"],                                                                                           answer:1, points:10, explanation:"Le RGPD est entré en vigueur le 25 mai 2018.", resources:["rgpdGuide"],       optionNotes:["Loi californienne.","✓ Règlement européen depuis mai 2018.","Loi américaine santé.","Gouvernance financière US."] },
-  { id:9,  text:"En droit des affaires, que désigne la notion de 'capital social' ?",                                   domain:"affaires",    options:["Les bénéfices de la société","Les apports des associés à la création","La valeur boursière de l'entreprise","Le chiffre d'affaires annuel"], answer:1, points:10, explanation:"Le capital social représente l'ensemble des apports réalisés par les associés lors de la constitution.", resources:["bilanTuto"], optionNotes:["Ce sont les résultats, pas le capital.","✓ Apports des associés à la création.","Valeur de marché, distincte du capital.","Indicateur d'activité."] },
-  { id:10, text:"En droit patrimonial, quel est l'abattement fiscal applicable entre parents et enfants pour une donation ?", domain:"patrimonial", options:["50 000 €","80 000 €","100 000 €","150 000 €"], answer:2, points:10, explanation:"L'abattement entre parents et enfants est de 100 000 € par parent et par enfant, renouvelable tous les 15 ans.", resources:["successionGuide"], optionNotes:["Montant insuffisant.","Abattement grands-parents/petits-enfants.","✓ 100 000 € par parent/enfant, tous les 15 ans.","Abattement inexistant à ce niveau."] },
+  { id:1,  text:"Quel est le taux de TVA standard en France ?",                                                        domain:"fiscal",      options:["18 %","19,6 %","20 %","21 %"],                                                                                        answer:2, points:1, explanation:"Le taux standard de TVA est de 20 % depuis le 1er janvier 2014.", resources:["tva2024"],         optionNotes:["N'a jamais existé en France.","Ancien taux jusqu'en 2013.","✓ Taux actuel.","Taux belge."] },
+  { id:2,  text:"Quel impôt finance principalement la Sécurité sociale ?",                                              domain:"fiscal",      options:["IR","IS","CSG","TVA"],                                                                                                 answer:2, points:1, explanation:"La CSG est le premier prélèvement obligatoire français en volume.", resources:["csgActu"],         optionNotes:["Finance le budget de l'État.","Finance le budget de l'État.","✓ Créée en 1991.","Finance l'État et partiellement la Sécu."] },
+  { id:3,  text:"Durée légale de conservation des bulletins de salaire ?",                                              domain:"social",      options:["3 ans","5 ans","Durée illimitée","10 ans"],                                                                            answer:2, points:1, explanation:"Depuis la loi Travail de 2016, conservation sans limitation de durée.", resources:["paieActu"],        optionNotes:["Délai de prescription.","Délai pour documents comptables.","✓ Illimitée depuis la loi El Khomri.","Certains documents fiscaux."] },
+  { id:4,  text:"Quel est le délai légal de préavis pour un cadre en CDI ?",                                            domain:"social",      options:["1 mois","2 mois","3 mois","6 mois"],                                                                                   answer:2, points:1, explanation:"Le préavis légal pour un cadre en CDI est de 3 mois.", resources:["preavisRH"],       optionNotes:["Non-cadres avec moins de 2 ans.","Agents de maîtrise.","✓ Délai légal pour les cadres.","Possible contractuellement, pas légal."] },
+  { id:5,  text:"De quoi est composé un bilan comptable ?",                                                             domain:"affaires",    options:["Charges et produits","Actif et passif","Recettes et dépenses","Capital et emprunts"],                                    answer:1, points:1, explanation:"Le bilan présente l'actif (ce que possède l'entreprise) et le passif (ce qu'elle doit).", resources:["bilanTuto"],       optionNotes:["= compte de résultat.","✓ Structure du bilan.","= trésorerie.","= composantes du passif uniquement."] },
+  { id:6,  text:"Que signifie l'acronyme EBITDA ?",                                                                     domain:"affaires",    options:["Excédent Brut Indicatif","Earnings Before Interest, Taxes, Depreciation and Amortization","Estimation du Bénéfice","Aucune"], answer:1, points:1, explanation:"L'EBITDA mesure la performance opérationnelle avant financement, fiscalité et amortissements.", resources:["ebitdaPano"], optionNotes:["Traduction inventée.","✓ Définition exacte. En français : EBE.","Paraphrase incorrecte.","La bonne réponse est B."] },
+  { id:7,  text:"Quel est le délai de prescription de l'action en paiement des salaires ?",                             domain:"social",      options:["1 an","2 ans","3 ans","5 ans"],                                                                                        answer:2, points:1, explanation:"L'action en paiement des salaires se prescrit par 3 ans (art. L3245-1 du Code du travail).", resources:["preavisRH"],  optionNotes:["Trop court.","Certains litiges commerciaux.","✓ Art. L3245-1 du Code du travail.","Prescription de droit commun."] },
+  { id:8,  text:"Quelle réglementation encadre la protection des données personnelles en Europe ?",                     domain:"fiscal",      options:["CCPA","RGPD","HIPAA","SOX"],                                                                                           answer:1, points:1, explanation:"Le RGPD est entré en vigueur le 25 mai 2018.", resources:["rgpdGuide"],       optionNotes:["Loi californienne.","✓ Règlement européen depuis mai 2018.","Loi américaine santé.","Gouvernance financière US."] },
+  { id:9,  text:"En droit des affaires, que désigne la notion de 'capital social' ?",                                   domain:"affaires",    options:["Les bénéfices de la société","Les apports des associés à la création","La valeur boursière de l'entreprise","Le chiffre d'affaires annuel"], answer:1, points:1, explanation:"Le capital social représente l'ensemble des apports réalisés par les associés lors de la constitution.", resources:["bilanTuto"], optionNotes:["Ce sont les résultats, pas le capital.","✓ Apports des associés à la création.","Valeur de marché, distincte du capital.","Indicateur d'activité."] },
+  { id:10, text:"En droit patrimonial, quel est l'abattement fiscal applicable entre parents et enfants pour une donation ?", domain:"patrimonial", options:["50 000 €","80 000 €","100 000 €","150 000 €"], answer:2, points:1, explanation:"L'abattement entre parents et enfants est de 100 000 € par parent et par enfant, renouvelable tous les 15 ans.", resources:["successionGuide"], optionNotes:["Montant insuffisant.","Abattement grands-parents/petits-enfants.","✓ 100 000 € par parent/enfant, tous les 15 ans.","Abattement inexistant à ce niveau."] },
 ];
-const MAX_PTS = 100;
-const ALL_PLAYERS = [
-  { name:"Sophie Martin",   co:"Nexia Paris",   coIdx:0, initials:"SM", cabinetSize:"sm" },
-  { name:"Thomas Lebrun",   co:"EY France",     coIdx:1, initials:"TL", cabinetSize:"lg" },
-  { name:"Camille Dupont",  co:"KPMG Lyon",     coIdx:2, initials:"CD", cabinetSize:"md" },
-  { name:"Marc Fontaine",   co:"Nexia Paris",   coIdx:0, initials:"MF", cabinetSize:"sm" },
-  { name:"Julie Bernard",   co:"Deloitte",      coIdx:3, initials:"JB", cabinetSize:"lg" },
-  { name:"Antoine Roux",    co:"EY France",     coIdx:1, initials:"AR", cabinetSize:"lg" },
-  { name:"Léa Moreau",      co:"KPMG Lyon",     coIdx:2, initials:"LM", cabinetSize:"md" },
-  { name:"Pierre Duval",    co:"Cab. Duval",    coIdx:3, initials:"PD", cabinetSize:"xs" },
-  { name:"Emma Blanchard",  co:"BDO France",    coIdx:4, initials:"EB", cabinetSize:"md" },
-  { name:"Lucas Girard",    co:"Cab. Duval",    coIdx:3, initials:"LG", cabinetSize:"xs" },
+const MAX_PTS = 10;
+
+// Distribution simulée par tranche (% de participants)
+const DISTRIB_QUIZ = {
+  "S.12": [{ min:0, max:2, pct:8 }, { min:3, max:5, pct:22 }, { min:6, max:8, pct:45 }, { min:9, max:10, pct:25 }],
+  "S.11": [{ min:0, max:2, pct:12 }, { min:3, max:5, pct:28 }, { min:6, max:8, pct:38 }, { min:9, max:10, pct:22 }],
+  "S.10": [{ min:0, max:2, pct:10 }, { min:3, max:5, pct:25 }, { min:6, max:8, pct:42 }, { min:9, max:10, pct:23 }],
+};
+const DISTRIB_QT = {
+  "T1": [{ min:0, max:6, pct:10 }, { min:7, max:15, pct:25 }, { min:16, max:24, pct:40 }, { min:25, max:30, pct:25 }],
+  "T2": [{ min:0, max:6, pct:8  }, { min:7, max:15, pct:22 }, { min:16, max:24, pct:44 }, { min:25, max:30, pct:26 }],
+};
+const DISTRIB_YEAR = [
+  { min:0, max:12, pct:9 }, { min:13, max:30, pct:24 },
+  { min:31, max:48, pct:43 }, { min:49, max:60, pct:24 },
 ];
-const QUIZ_SCORES  = { "S.12":[90,80,100,70,90,60,80,100,70,60], "S.11":[80,70,90,60,80,50,70,80,90,50], "S.10":[70,90,80,80,60,90,60,70,60,80], "S.9":[100,60,70,90,70,80,50,60,80,70], "S.8":[80,80,60,100,50,70,90,80,50,90], "S.7":[60,100,80,70,60,80,50,90,70,80] };
-const QUIZ_TIMES   = [42,55,38,61,44,70,88,35,67,78];
-const QUIZ_CORRECT = [9,8,10,7,9,6,8,10,7,6];
-function buildQuizRanking(week, sz) {
-  var sc = QUIZ_SCORES[week] || QUIZ_SCORES["S.12"];
-  var pl = sz && sz !== "all" ? ALL_PLAYERS.filter(function(p){ return p.cabinetSize === sz; }) : ALL_PLAYERS;
-  return pl
-    .map(function(p){ var i = ALL_PLAYERS.indexOf(p); return Object.assign({}, p, { score:sc[i], time:QUIZ_TIMES[i], correct:QUIZ_CORRECT[i] }); })
-    .sort(function(a,b){ return b.correct !== a.correct ? b.correct - a.correct : a.time - b.time; })
-    .map(function(p,i){ return Object.assign({}, p, { rank:i+1 }); });
-}
-function buildPeriodRanking(weeks, sz) {
-  var pl = sz && sz !== "all" ? ALL_PLAYERS.filter(function(p){ return p.cabinetSize === sz; }) : ALL_PLAYERS;
-  return pl
-    .map(function(p){ var i = ALL_PLAYERS.indexOf(p); var tot = weeks.reduce(function(a,w){ return a + (QUIZ_SCORES[w] ? QUIZ_SCORES[w][i] : 0); }, 0); return Object.assign({}, p, { score:tot, played:weeks.length, correct:QUIZ_CORRECT[i]*weeks.length }); })
-    .sort(function(a,b){ return b.score - a.score || b.correct - a.correct; })
-    .map(function(p,i){ return Object.assign({}, p, { rank:i+1 }); });
-}
+
+const USER_SCORE_QUIZ = 9; // score utilisateur courant sur 10
+
 const coColors = [NAVY, "#2A5298", "#1A7A74", "#2C4770", "#1B5E56"];
 const coLight  = ["#EBF4FF","#EBF0FA","#E6FAF9","#E8EFF8","#E6F5F3"];
 const fmt      = function(t){ return String(Math.floor(t/60)).padStart(2,"0") + ":" + String(t%60).padStart(2,"0"); };
@@ -96,6 +83,8 @@ const css = `
 .ob:hover:not(:disabled){border-color:#1B3A6B !important;background:#EBF4FF !important}
 .nb:hover{background:#EBF4FF !important}
 `;
+
+// ── ATOMS ─────────────────────────────────────────────────────────────────
 function Chip(p) {
   return <span style={Object.assign({ fontSize:11, fontWeight:600, letterSpacing:"0.05em", textTransform:"uppercase", padding:"4px 10px", borderRadius:20, background:p.bg||C.sand, color:p.color||C.muted, border:"1px solid "+(p.border||C.border) }, p.style||{})}>{p.children}</span>;
 }
@@ -178,6 +167,7 @@ function ExplCard(p) {
     </div>
   );
 }
+
 // ── QUIZ ──────────────────────────────────────────────────────────────────
 function QuizScreen(p) {
   var phaseSt  = useState("intro"); var phase   = phaseSt[0];   var setPhase   = phaseSt[1];
@@ -214,12 +204,12 @@ function QuizScreen(p) {
         </div>
         <h1 style={{ fontSize:38, fontWeight:800, fontStyle:"italic", color:NAVY, margin:"0 0 14px", lineHeight:1.15 }}>Quiz<br/>hebdomadaire</h1>
         <p style={{ fontSize:16, color:C.muted, margin:"0 auto", maxWidth:440, lineHeight:1.6 }}>
-          Testez vos connaissances en droit et en chiffre — <strong style={{ color:TEAL }}>10 questions, 100 points</strong>.
+          Testez vos connaissances en droit et en chiffre — <strong style={{ color:TEAL }}>10 questions, 10 points</strong>.
         </p>
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:16, marginBottom:32 }}>
-        {[["10","Questions","par quiz"],["100","Points","maximum"],["Départage","Bonnes rép. + temps","en cas d'égalité"]].map(function(it){
-          return <div key={it[0]} style={{ background:WHITE, border:"1px solid "+C.border, borderRadius:14, padding:"20px 16px", textAlign:"center", boxShadow:"0 2px 12px rgba(27,58,107,.06)" }}>
+        {[["10","Questions","par quiz"],["10","Points","maximum"],["Départage","Bonnes rép. + temps","en cas d'égalité"]].map(function(it){
+          return <div key={it[0]+it[1]} style={{ background:WHITE, border:"1px solid "+C.border, borderRadius:14, padding:"20px 16px", textAlign:"center", boxShadow:"0 2px 12px rgba(27,58,107,.06)" }}>
             <div style={{ fontSize:it[0]==="Départage"?15:30, fontWeight:800, color:NAVY, marginBottom:4, lineHeight:1.1 }}>{it[0]}</div>
             <div style={{ fontSize:13, fontWeight:600, color:TEAL, marginBottom:4 }}>{it[1]}</div>
             <div style={{ fontSize:11, color:C.faint }}>{it[2]}</div>
@@ -298,7 +288,7 @@ function QuizScreen(p) {
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
           <span style={{ fontFamily:"ui-monospace,monospace", fontSize:15, fontWeight:700, color:NAVY }}>{fmt(elapsed)}</span>
-          <Chip color={C.gold} bg={C.goldBg} border={C.goldBorder}>{q.points} pts</Chip>
+          <Chip color={C.gold} bg={C.goldBg} border={C.goldBorder}>{q.points} pt</Chip>
         </div>
       </div>
       <div style={{ height:5, background:C.border, borderRadius:3, marginBottom:6 }}>
@@ -306,7 +296,7 @@ function QuizScreen(p) {
       </div>
       <div style={{ display:"flex", justifyContent:"space-between", fontSize:11, color:C.faint, marginBottom:24 }}>
         <span>{correctCount} bonne{correctCount!==1?"s":""} réponse{correctCount!==1?"s":""}</span>
-        <span>{score} pts</span>
+        <span>{score} / {MAX_PTS} pts</span>
       </div>
       <p style={{ fontSize:20, fontWeight:700, lineHeight:1.5, color:NAVY, margin:"0 0 24px" }}>{q.text}</p>
       <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
@@ -345,72 +335,100 @@ function QuizScreen(p) {
     </div>
   );
 }
-// ── RANK TABLE ─────────────────────────────────────────────────────────────
-function RankTable({ data, maxPts, label }) {
+
+// ── DISTRIBUTION WIDGET ───────────────────────────────────────────────────
+const BRACKET_COLORS = [
+  { bg:"#FEF2F2", border:"#FECACA", bar:"#E57373", text:"#C0392B" },
+  { bg:"#FFFBEB", border:"#FDE68A", bar:"#F5C518", text:"#92400E" },
+  { bg:"#E6FAF9", border:"#9EEAE6", bar:TEAL,      text:"#0F6B62" },
+  { bg:"#EBF5EE", border:"#A8D5B8", bar:"#27AE60",  text:"#1A5C38" },
+];
+
+function DistribWidget({ distrib, userScore, maxPts, label }) {
+  var userBracket = userScore !== undefined
+    ? distrib.find(function(b){ return userScore >= b.min && userScore <= b.max; })
+    : null;
+  var userIdx = userBracket ? distrib.indexOf(userBracket) : -1;
   return (
     <div style={{ background:WHITE, border:"1px solid "+C.border, borderRadius:16, overflow:"hidden", boxShadow:"0 2px 12px rgba(27,58,107,.06)" }}>
-      <div style={{ padding:"16px 22px", borderBottom:"1px solid "+C.border, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-        <span style={{ fontSize:14, fontWeight:700, color:NAVY, fontStyle:"italic" }}>{label}</span>
-        <span style={{ fontSize:12, color:C.faint }}>sur {maxPts} points</span>
-      </div>
-      {data.map(function(pl, i){
-        return (
-          <div key={pl.initials+i} className="rh" style={{ display:"flex", alignItems:"center", gap:14, padding:"13px 22px", borderBottom:i<data.length-1?"1px solid "+C.border:"none" }}>
-            <span style={{ fontSize:14, fontWeight:700, color:pl.rank<=3?TEAL:C.faint, minWidth:24 }}>{pl.rank}</span>
-            <Avatar initials={pl.initials} idx={pl.coIdx} size={34}/>
-            <div style={{ flex:1 }}>
-              <div style={{ fontSize:13, fontWeight:700, color:NAVY }}>{pl.name}</div>
-              <div style={{ fontSize:11, color:C.faint }}>{pl.co}</div>
-            </div>
-            <Bar value={pl.score} max={maxPts} color={TEAL}/>
-            <div style={{ textAlign:"right", minWidth:80 }}>
-              <div style={{ fontSize:14, fontWeight:700, color:NAVY }}>{pl.score} pts</div>
-            </div>
+      <div style={{ padding:"18px 22px", borderBottom:"1px solid "+C.border, display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:10 }}>
+        <div>
+          <p style={{ fontSize:14, fontWeight:700, color:NAVY, margin:"0 0 2px", fontStyle:"italic" }}>{label}</p>
+          <p style={{ fontSize:12, color:C.faint, margin:0 }}>Distribution des participants · sur {maxPts} points</p>
+        </div>
+        {userBracket && (
+          <div style={{ padding:"8px 16px", borderRadius:30, background:BRACKET_COLORS[userIdx].bg, border:"1px solid "+BRACKET_COLORS[userIdx].border }}>
+            <span style={{ fontSize:12, fontWeight:700, color:BRACKET_COLORS[userIdx].text }}>
+              Vous êtes dans les {userBracket.pct} % · tranche {userBracket.min}–{userBracket.max} pts
+            </span>
           </div>
-        );
-      })}
+        )}
+      </div>
+      {/* Barres visuelles */}
+      <div style={{ padding:"24px 22px 8px" }}>
+        <div style={{ display:"flex", alignItems:"flex-end", gap:12, height:90, marginBottom:12 }}>
+          {distrib.map(function(b, i){
+            var col = BRACKET_COLORS[i];
+            var isUser = userBracket && b === userBracket;
+            var barH = Math.max(8, Math.round(b.pct / 100 * 80));
+            return (
+              <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
+                <span style={{ fontSize:12, fontWeight:700, color:isUser?col.text:C.faint }}>{b.pct}%</span>
+                <div style={{ width:"100%", height:barH, borderRadius:"4px 4px 0 0", background:isUser?col.bar:col.border, border:"1px solid "+col.border, position:"relative" }}>
+                  {isUser && (
+                    <div style={{ position:"absolute", top:-22, left:"50%", transform:"translateX(-50%)", background:col.bar, color:WHITE, fontSize:9, fontWeight:700, padding:"2px 7px", borderRadius:4, whiteSpace:"nowrap" }}>
+                      vous
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ height:1, background:C.border, marginBottom:10 }}/>
+      </div>
+      {/* Lignes de détail */}
+      <div style={{ padding:"0 22px 20px", display:"flex", flexDirection:"column", gap:8 }}>
+        {distrib.map(function(b, i){
+          var col = BRACKET_COLORS[i];
+          var isUser = userBracket && b === userBracket;
+          return (
+            <div key={i} style={{ display:"flex", alignItems:"center", gap:14, padding:"11px 14px", borderRadius:10, background:isUser?col.bg:"transparent", border:"1px solid "+(isUser?col.border:"transparent") }}>
+              <div style={{ width:10, height:10, borderRadius:2, background:isUser?col.bar:col.border, flexShrink:0 }}/>
+              <span style={{ fontSize:13, fontWeight:isUser?700:400, color:isUser?col.text:NAVY, flex:1 }}>{b.min} – {b.max} pts</span>
+              <div style={{ width:90, height:5, borderRadius:3, background:C.border, overflow:"hidden" }}>
+                <div style={{ height:"100%", borderRadius:3, background:isUser?col.bar:col.border, width:b.pct+"%", transition:"width .7s ease" }}/>
+              </div>
+              <span style={{ fontSize:12, fontWeight:600, color:isUser?col.text:C.muted, minWidth:36, textAlign:"right" }}>{b.pct}%</span>
+              {isUser && <Chip color={col.text} bg={col.bg} border={col.border} style={{ fontSize:10, padding:"2px 8px" }}>Votre tranche</Chip>}
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ margin:"0 22px 20px", padding:"12px 16px", borderRadius:10, background:C.sand, border:"1px solid "+C.border }}>
+        <p style={{ fontSize:12, color:C.muted, margin:0, lineHeight:1.6 }}>
+          <strong style={{ color:NAVY }}>Lecture :</strong> chaque tranche indique le pourcentage de participants ayant obtenu ce nombre de points. Votre position est mise en évidence.
+        </p>
+      </div>
     </div>
   );
 }
+
 // ── LEADERBOARD ───────────────────────────────────────────────────────────
 function LeaderboardScreen() {
-  var viewSt  = useState("quiz");   var view    = viewSt[0];    var setView    = viewSt[1];
-  var scopeSt = useState("global"); var scope   = scopeSt[0];   var setScope   = scopeSt[1];
-  var sizeSt  = useState("xs");     var selSize = sizeSt[0];    var setSelSize = sizeSt[1];
-  var qtSt    = useState("T2");     var selQt   = qtSt[0];      var setSelQt   = qtSt[1];
-  var liveSt  = useState(true);     var live    = liveSt[0];    var setLive    = liveSt[1];
-  var dataSt  = useState(function(){ return buildQuizRanking("S.12", null); });
-  var data    = dataSt[0]; var setData = dataSt[1];
-  var tick    = useRef(null);
-  var sf      = scope === "cabinet" ? selSize : null;
-  useEffect(function(){
-    clearInterval(tick.current);
-    if(view !== "quiz" || !live) return;
-    tick.current = setInterval(function(){
-      setData(function(prev){
-        var u = prev.map(function(p){ return Object.assign({}, p, { score:Math.min(MAX_PTS, p.score+(Math.random()>.9?10:0)) }); });
-        return u.sort(function(a,b){ return b.correct!==a.correct ? b.correct-a.correct : a.time-b.time; }).map(function(p,i){ return Object.assign({}, p, { rank:i+1 }); });
-      });
-    }, 3500);
-    return function(){ clearInterval(tick.current); };
-  }, [view, live]);
-  useEffect(function(){ setData(buildQuizRanking("S.12", sf)); }, [scope, selSize]);
-  var QUARTERS = {
-    "T1":{ label:"T1 — Jan · Fév · Mars", weeks:["S.7","S.8","S.9"] },
-    "T2":{ label:"T2 — Avr · Mai · Juin", weeks:["S.10","S.11","S.12"] },
+  var viewSt = useState("quiz");  var view   = viewSt[0];  var setView   = viewSt[1];
+  var qtSt   = useState("T2");    var selQt  = qtSt[0];    var setSelQt  = qtSt[1];
+  const QUARTERS = {
+    "T1":{ label:"T1 — Jan · Fév · Mars", weeks:3, maxPts:30 },
+    "T2":{ label:"T2 — Avr · Mai · Juin", weeks:3, maxPts:30 },
   };
-  var ALL_WEEKS = ["S.7","S.8","S.9","S.10","S.11","S.12"];
-  var qtData     = buildPeriodRanking(QUARTERS[selQt].weeks, sf);
-  var yearData   = buildPeriodRanking(ALL_WEEKS, sf);
-  var qtMaxPts   = QUARTERS[selQt].weeks.length * MAX_PTS;
-  var yearMaxPts = ALL_WEEKS.length * MAX_PTS;
+  const ALL_WEEKS = 6;
   return (
     <div style={{ maxWidth:820, margin:"0 auto", padding:"48px 24px" }}>
       <div style={{ textAlign:"center", marginBottom:36 }}>
         <h2 style={{ fontSize:30, fontWeight:800, fontStyle:"italic", color:NAVY, margin:"0 0 8px" }}>Classement</h2>
-        <p style={{ fontSize:14, color:C.muted, margin:0 }}>Départage par bonnes réponses, puis par temps de réponse</p>
+        <p style={{ fontSize:14, color:C.muted, margin:0 }}>Votre position parmi les participants</p>
       </div>
-      {/* SÉLECTEUR PÉRIODE */}
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:1, background:C.border, borderRadius:16, overflow:"hidden", marginBottom:24, boxShadow:"0 2px 12px rgba(27,58,107,.06)" }}>
         {[
           ["quiz",    "Quiz en cours",  "Semaine en cours · 10 pts"],
@@ -427,50 +445,24 @@ function LeaderboardScreen() {
           );
         })}
       </div>
-      {/* SÉLECTEUR SCOPE */}
-      <div style={{ display:"flex", gap:10, marginBottom:16, flexWrap:"wrap", alignItems:"center" }}>
-        <div style={{ display:"flex", gap:2, background:C.sand, padding:3, borderRadius:30 }}>
-          {[["global","Tous les cabinets"],["cabinet","Par taille de cabinet"]].map(function(it){
-            var active = scope===it[0];
-            return (
-              <button key={it[0]} onClick={function(){ setScope(it[0]); }}
-                style={{ padding:"7px 18px", borderRadius:28, border:"none", cursor:"pointer", fontSize:12, fontWeight:active?700:400, background:active?NAVY:"transparent", color:active?WHITE:C.muted, transition:"all .2s" }}>
-                {it[1]}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-      {scope === "cabinet" && (
-        <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginBottom:20 }}>
-          {CABINET_SIZES.map(function(sz){
-            var active = selSize===sz.id;
-            return (
-              <button key={sz.id} onClick={function(){ setSelSize(sz.id); }}
-                style={{ padding:"8px 18px", borderRadius:30, border:"2px solid "+(active?TEAL:C.border), background:active?TEAL:WHITE, color:active?WHITE:C.muted, fontSize:12, fontWeight:active?700:400, cursor:"pointer", transition:"all .2s" }}>
-                {sz.label}
-              </button>
-            );
-          })}
-        </div>
-      )}
-      {/* VUE QUIZ EN COURS — sur 10 pts */}
+
+      {/* VUE QUIZ */}
       {view === "quiz" && (
         <div>
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20, flexWrap:"wrap", gap:10 }}>
-            <div style={{ padding:"10px 18px", borderRadius:10, background:C.tealBg, border:"1px solid "+C.tealBorder, display:"flex", alignItems:"center", gap:10 }}>
-              <span style={{ fontSize:13, fontWeight:700, color:NAVY }}>Quiz Semaine 12 — classement sur 10 points</span>
-            </div>
-            <button onClick={function(){ setLive(function(v){ return !v; }); }}
-              style={{ padding:"7px 18px", borderRadius:30, border:"2px solid "+(live?TEAL:C.border), background:live?C.tealBg:WHITE, color:live?TEAL:C.muted, fontSize:12, fontWeight:600, cursor:"pointer", display:"flex", alignItems:"center", gap:8 }}>
-              <span style={{ width:7, height:7, borderRadius:"50%", background:live?TEAL:C.faint, display:"inline-block", animation:live?"pulse 1.5s infinite":"none" }}/>
-              {live?"En direct":"Pause"}
-            </button>
+          <div style={{ padding:"12px 18px", borderRadius:10, background:C.tealBg, border:"1px solid "+C.tealBorder, marginBottom:20, display:"flex", alignItems:"center", gap:10 }}>
+            <span style={{ fontSize:13, fontWeight:700, color:NAVY }}>Quiz Semaine 12 · classement sur 10 points</span>
+            <span style={{ fontSize:12, color:C.faint, marginLeft:"auto" }}>Votre score : {USER_SCORE_QUIZ}/10</span>
           </div>
-          <RankTable data={data} maxPts={10} label="Classement du quiz en cours"/>
+          <DistribWidget
+            distrib={DISTRIB_QUIZ["S.12"]}
+            userScore={USER_SCORE_QUIZ}
+            maxPts={10}
+            label="Distribution des scores · Semaine 12"
+          />
         </div>
       )}
-      {/* VUE TRIMESTRE — points cumulés */}
+
+      {/* VUE TRIMESTRE */}
       {view === "quarter" && (
         <div>
           <div style={{ display:"flex", gap:2, background:C.sand, padding:3, borderRadius:30, marginBottom:16, width:"fit-content" }}>
@@ -482,39 +474,44 @@ function LeaderboardScreen() {
           </div>
           <div style={{ padding:"12px 18px", borderRadius:10, background:C.tealBg, border:"1px solid "+C.tealBorder, marginBottom:20, display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
             <span style={{ fontSize:13, fontWeight:700, color:NAVY }}>{QUARTERS[selQt].label}</span>
-            <span style={{ color:C.faint }}>·</span>
-            {QUARTERS[selQt].weeks.map(function(w){ return <Chip key={w} color={NAVY} bg={WHITE} border={C.border}>{w}</Chip>; })}
-            <span style={{ fontSize:12, color:C.muted, marginLeft:4 }}>{QUARTERS[selQt].weeks.length} quiz · {qtMaxPts} pts cumulés</span>
+            <span style={{ fontSize:12, color:C.muted, marginLeft:"auto" }}>{QUARTERS[selQt].weeks} quiz · {QUARTERS[selQt].maxPts} pts cumulés maximum</span>
           </div>
-          <RankTable data={qtData} maxPts={qtMaxPts} label={"Classement "+QUARTERS[selQt].label}/>
+          <DistribWidget
+            distrib={DISTRIB_QT[selQt]}
+            userScore={undefined}
+            maxPts={QUARTERS[selQt].maxPts}
+            label={"Distribution des scores · "+QUARTERS[selQt].label}
+          />
         </div>
       )}
-      {/* VUE ANNUELLE — points cumulés */}
+
+      {/* VUE ANNUELLE */}
       {view === "year" && (
         <div>
           <div style={{ padding:"12px 18px", borderRadius:10, background:C.tealBg, border:"1px solid "+C.tealBorder, marginBottom:20, display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:8 }}>
-            <div>
-              <span style={{ fontSize:14, fontWeight:700, color:NAVY }}>Année 2025</span>
-              <span style={{ fontSize:13, color:C.muted, marginLeft:10 }}>{ALL_WEEKS.length} quiz · {yearMaxPts} pts cumulés</span>
-            </div>
-            <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
-              {ALL_WEEKS.map(function(w){ return <Chip key={w} color={NAVY} bg={WHITE} border={C.border}>{w}</Chip>; })}
-            </div>
+            <span style={{ fontSize:14, fontWeight:700, color:NAVY }}>Année 2025</span>
+            <span style={{ fontSize:13, color:C.muted }}>{ALL_WEEKS} quiz · {ALL_WEEKS * 10} pts cumulés maximum</span>
           </div>
-          <RankTable data={yearData} maxPts={yearMaxPts} label="Classement annuel 2025"/>
+          <DistribWidget
+            distrib={DISTRIB_YEAR}
+            userScore={undefined}
+            maxPts={ALL_WEEKS * 10}
+            label="Distribution des scores · Année 2025"
+          />
         </div>
       )}
     </div>
   );
 }
+
 // ── HISTORY ───────────────────────────────────────────────────────────────
 function HistoryScreen() {
   var oqSt  = useState(null); var openQuiz = oqSt[0];  var setOpenQuiz = oqSt[1];
   var oqSt2 = useState(null); var openQ    = oqSt2[0]; var setOpenQ    = oqSt2[1];
   var HISTORY = [
-    { id:"s12", week:12, date:"17 mars 2025", score:90, total:MAX_PTS, correct:9,  questions:ACTIVE_Q.slice(0,3) },
-    { id:"s11", week:11, date:"10 mars 2025", score:80, total:MAX_PTS, correct:8,  questions:ACTIVE_Q.slice(3,5) },
-    { id:"s10", week:10, date:"3 mars 2025",  score:70, total:MAX_PTS, correct:7,  questions:ACTIVE_Q.slice(5,7) },
+    { id:"s12", week:12, date:"17 mars 2025", score:9, total:MAX_PTS, correct:9,  questions:ACTIVE_Q.slice(0,3) },
+    { id:"s11", week:11, date:"10 mars 2025", score:8, total:MAX_PTS, correct:8,  questions:ACTIVE_Q.slice(3,5) },
+    { id:"s10", week:10, date:"3 mars 2025",  score:7, total:MAX_PTS, correct:7,  questions:ACTIVE_Q.slice(5,7) },
   ];
   return (
     <div style={{ maxWidth:780, margin:"0 auto", padding:"48px 24px" }}>
@@ -532,7 +529,7 @@ function HistoryScreen() {
                   <span style={{ fontSize:15, fontWeight:700, color:NAVY }}>Semaine {quiz.week}</span>
                   <Chip>{quiz.date}</Chip>
                   <Chip color={C.green} bg={C.greenBg} border={C.greenBorder}>{quiz.correct}/10 correctes</Chip>
-                  <Chip color={C.gold} bg={C.goldBg} border={C.goldBorder}>{quiz.score}/100 pts</Chip>
+                  <Chip color={C.gold} bg={C.goldBg} border={C.goldBorder}>{quiz.score}/10 pts</Chip>
                 </div>
                 <Bar value={quiz.score} max={quiz.total} color={TEAL} h={5}/>
               </div>
@@ -590,6 +587,7 @@ function HistoryScreen() {
     </div>
   );
 }
+
 // ── RESOURCES ─────────────────────────────────────────────────────────────
 function ResourcesScreen() {
   var tfSt = useState("all"); var typeFilter = tfSt[0]; var setTypeFilter = tfSt[1];
@@ -661,25 +659,24 @@ function ResourcesScreen() {
     </div>
   );
 }
-// ── HOME — modifiée ───────────────────────────────────────────────────────
+
+// ── HOME ──────────────────────────────────────────────────────────────────
 function HomeScreen(p) {
   return (
     <div style={{ maxWidth:820, margin:"0 auto", padding:"48px 24px" }}>
-      {/* HERO */}
       <div style={{ background:GRAD, borderRadius:20, padding:"40px 40px", marginBottom:32, color:WHITE, position:"relative", overflow:"hidden" }}>
         <div style={{ position:"relative", zIndex:1 }}>
           <p style={{ fontSize:12, fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", opacity:.7, margin:"0 0 10px" }}>Semaine 12 · 17 mars 2025</p>
           <h1 style={{ fontSize:34, fontWeight:800, fontStyle:"italic", margin:"0 0 10px", lineHeight:1.15 }}>Bonjour, Martin</h1>
-          <p style={{ fontSize:15, opacity:.85, margin:"0 0 24px", lineHeight:1.6 }}>Votre quiz hebdomadaire est disponible.<br/>10 questions · 100 points · 4 thématiques juridiques.</p>
+          <p style={{ fontSize:15, opacity:.85, margin:"0 0 24px", lineHeight:1.6 }}>Votre quiz hebdomadaire est disponible.<br/>10 questions · 10 points · 4 thématiques juridiques.</p>
           {!p.done
             ? <TealBtn onClick={p.onPlay} style={{ background:WHITE, color:NAVY, boxShadow:"0 4px 16px rgba(0,0,0,.15)" }}>Commencer le quiz →</TealBtn>
             : <Chip color={C.green} bg={C.greenBg} border={C.greenBorder}>Quiz complété ✓</Chip>}
         </div>
       </div>
-      {/* STATS — 2 colonnes, sans classement perso ni top cabinet */}
       <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:1, background:C.border, borderRadius:16, overflow:"hidden", marginBottom:28, boxShadow:"0 2px 12px rgba(27,58,107,.06)" }}>
         {[
-          ["90 pts",      "Cette semaine",      "9/10 bonnes réponses"],
+          ["9 / 10 pts",   "Cette semaine",     "9 bonnes réponses"],
           ["Terminé en 42s","Temps de réponse",  "Quiz Semaine 12"],
         ].map(function(it){
           return <div key={it[0]} style={{ background:WHITE, padding:"20px 22px" }}>
@@ -689,7 +686,6 @@ function HomeScreen(p) {
           </div>;
         })}
       </div>
-      {/* RÉUSSITE PAR DOMAINE */}
       <div style={{ background:WHITE, border:"1px solid "+C.border, borderRadius:16, overflow:"hidden", boxShadow:"0 2px 12px rgba(27,58,107,.06)" }}>
         <div style={{ padding:"18px 22px", borderBottom:"1px solid "+C.border }}>
           <p style={{ fontSize:14, fontWeight:700, color:NAVY, margin:"0 0 2px", fontStyle:"italic" }}>Votre réussite par domaine</p>
@@ -720,6 +716,7 @@ function HomeScreen(p) {
     </div>
   );
 }
+
 // ── APP ───────────────────────────────────────────────────────────────────
 export default function App() {
   var screenSt = useState("home"); var screen = screenSt[0]; var setScreen = screenSt[1];
