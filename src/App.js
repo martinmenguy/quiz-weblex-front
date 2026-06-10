@@ -378,6 +378,105 @@ function QuizScreen(p) {
   );
 }
 
+// ── SCORE DISTRIBUTION WIDGET ─────────────────────────────────────────────
+
+function ScoreDistribution({ data, maxScore, userScore }) {
+  // Build brackets
+  var brackets = [
+    { label:"0 – 39 pts",  min:0,   max:39,  color:"#FECACA", textColor:C.red,   bg:"#FEF2F2",  border:"#FECACA" },
+    { label:"40 – 59 pts", min:40,  max:59,  color:"#FDE68A", textColor:C.gold,  bg:C.goldBg,   border:C.goldBorder },
+    { label:"60 – 79 pts", min:60,  max:79,  color:TEAL+"80", textColor:"#0D6B63", bg:C.tealBg, border:C.tealBorder },
+    { label:"80 – 100 pts",min:80,  max:100, color:C.green,   textColor:C.green,  bg:C.greenBg,  border:C.greenBorder },
+  ];
+
+  var total = data.length;
+  brackets = brackets.map(function(b){
+    var inBracket = data.filter(function(p){ return p.score >= b.min && p.score <= b.max; });
+    var pct = total > 0 ? Math.round(inBracket.length / total * 100) : 0;
+    var userIn = userScore !== undefined && userScore >= b.min && userScore <= b.max;
+    return Object.assign({}, b, { count:inBracket.length, pct:pct, userIn:userIn });
+  });
+
+  var userBracket = brackets.find(function(b){ return b.userIn; });
+
+  return (
+    <div style={{ background:WHITE, border:"1px solid "+C.border, borderRadius:16, overflow:"hidden", marginBottom:28, boxShadow:"0 2px 12px rgba(27,58,107,.06)" }}>
+      <div style={{ padding:"18px 22px", borderBottom:"1px solid "+C.border, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+        <div>
+          <p style={{ fontSize:14, fontWeight:700, color:NAVY, margin:"0 0 2px", fontStyle:"italic" }}>Distribution des scores</p>
+          <p style={{ fontSize:12, color:C.faint, margin:0 }}>{total} participant{total>1?"s":""} · semaine en cours</p>
+        </div>
+        {userBracket && (
+          <div style={{ padding:"8px 16px", borderRadius:30, background:userBracket.bg, border:"1px solid "+userBracket.border }}>
+            <span style={{ fontSize:12, fontWeight:700, color:userBracket.textColor }}>Vous êtes dans la tranche {userBracket.label}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Visual bar chart */}
+      <div style={{ padding:"22px 22px 8px" }}>
+        <div style={{ display:"flex", alignItems:"flex-end", gap:10, height:80, marginBottom:10 }}>
+          {brackets.map(function(b, i){
+            var barH = b.pct > 0 ? Math.max(8, Math.round(b.pct / 100 * 72)) : 4;
+            return (
+              <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
+                <span style={{ fontSize:11, fontWeight:700, color:b.userIn?b.textColor:C.faint }}>{b.pct}%</span>
+                <div style={{
+                  width:"100%", height:barH, borderRadius:"4px 4px 0 0",
+                  background:b.userIn?b.textColor:b.color,
+                  border:"1px solid "+(b.userIn?b.textColor:b.border),
+                  transition:"height .6s ease",
+                  position:"relative",
+                  boxShadow:b.userIn?"0 2px 8px "+b.textColor+"40":"none"
+                }}>
+                  {b.userIn && (
+                    <div style={{ position:"absolute", top:-22, left:"50%", transform:"translateX(-50%)", background:b.textColor, color:WHITE, fontSize:9, fontWeight:700, padding:"2px 6px", borderRadius:4, whiteSpace:"nowrap" }}>
+                      vous
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ height:1, background:C.border, marginBottom:10 }}/>
+      </div>
+
+      {/* Bracket rows */}
+      <div style={{ padding:"0 22px 20px", display:"flex", flexDirection:"column", gap:8 }}>
+        {brackets.map(function(b, i){
+          return (
+            <div key={i} style={{
+              display:"flex", alignItems:"center", gap:14, padding:"10px 14px", borderRadius:10,
+              background:b.userIn?b.bg:"transparent",
+              border:"1px solid "+(b.userIn?b.border:"transparent"),
+              transition:"background .2s"
+            }}>
+              <div style={{ width:10, height:10, borderRadius:2, background:b.userIn?b.textColor:b.color, flexShrink:0 }}/>
+              <span style={{ fontSize:13, fontWeight:b.userIn?700:400, color:b.userIn?b.textColor:NAVY, flex:1 }}>{b.label}</span>
+              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                <div style={{ width:80, height:5, borderRadius:3, background:C.border, overflow:"hidden" }}>
+                  <div style={{ height:"100%", borderRadius:3, background:b.userIn?b.textColor:b.color, width:b.pct+"%", transition:"width .7s ease" }}/>
+                </div>
+                <span style={{ fontSize:12, fontWeight:600, color:b.userIn?b.textColor:C.muted, minWidth:32, textAlign:"right" }}>{b.pct}%</span>
+                <span style={{ fontSize:11, color:C.faint, minWidth:60, textAlign:"right" }}>{b.count} participant{b.count>1?"s":""}</span>
+                {b.userIn && <Chip color={b.textColor} bg={b.bg} border={b.border} style={{ fontSize:10, padding:"2px 8px" }}>Votre tranche</Chip>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Bottom context */}
+      <div style={{ margin:"0 22px 20px", padding:"12px 16px", borderRadius:10, background:C.sand, border:"1px solid "+C.border }}>
+        <p style={{ fontSize:12, color:C.muted, margin:0, lineHeight:1.6 }}>
+          <strong style={{ color:NAVY }}>Lecture :</strong> chaque tranche regroupe les participants ayant obtenu ce score sur 100 points. En cas d'égalité, le classement final est déterminé par le nombre de bonnes réponses puis par le temps.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ── LEADERBOARD ───────────────────────────────────────────────────────────
 
 function LeaderboardScreen() {
@@ -415,54 +514,8 @@ function LeaderboardScreen() {
   var qtData   = buildPeriodRanking(QUARTERS[selQt].weeks, sf);
   var yearData = buildPeriodRanking(ALL_WEEKS, sf);
 
-  function Podium(pp){
-    var d = pp.data;
-    if(!d || !d.length) return <div style={{ textAlign:"center", padding:"32px", color:C.faint, fontSize:13 }}>Aucun participant dans cette catégorie</div>;
-    return (
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:16, marginBottom:24 }}>
-        {[d[1]||null, d[0]||null, d[2]||null].map(function(pl,idx){
-          if(!pl) return <div key={idx}/>;
-          var isFirst = pl.rank === 1;
-          return (
-            <div key={pl.initials} style={{ background:WHITE, border:"2px solid "+(isFirst?TEAL:C.border), borderRadius:16, padding:"24px 16px", textAlign:"center", position:"relative", marginTop:isFirst?0:20, boxShadow:isFirst?"0 4px 20px rgba(78,205,196,.2)":"0 2px 8px rgba(27,58,107,.06)" }}>
-              {isFirst && <div style={{ position:"absolute", top:-13, left:"50%", transform:"translateX(-50%)", background:TEAL, color:WHITE, fontSize:11, fontWeight:700, padding:"4px 14px", borderRadius:20, letterSpacing:"0.05em", textTransform:"uppercase", whiteSpace:"nowrap" }}>1re place</div>}
-              <div style={{ display:"flex", justifyContent:"center", marginBottom:12 }}><Avatar initials={pl.initials} idx={pl.coIdx} size={44}/></div>
-              <div style={{ fontSize:14, fontWeight:700, color:NAVY, marginBottom:2 }}>{pl.name}</div>
-              <div style={{ fontSize:12, color:C.faint, marginBottom:14 }}>{pl.co}</div>
-              <div style={{ fontSize:28, fontWeight:800, color:NAVY }}>{pl.score}</div>
-              <div style={{ fontSize:12, color:TEAL, fontWeight:600, marginBottom:10 }}>{pp.sub(pl)}</div>
-              <Chip color={NAVY} bg={C.sand} border={C.border}>{"#"+pl.rank}</Chip>
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
-
-  function Rows(pp){
-    var d = pp.data; if(!d || d.length <= 3) return null;
-    return (
-      <div style={{ background:WHITE, border:"1px solid "+C.border, borderRadius:14, overflow:"hidden", boxShadow:"0 2px 12px rgba(27,58,107,.06)" }}>
-        {d.slice(3).map(function(pl,i){
-          return (
-            <div key={pl.initials} className="rh" style={{ display:"flex", alignItems:"center", gap:14, padding:"13px 20px", borderBottom:i<d.length-4?"1px solid "+C.border:"none", transition:"background .15s" }}>
-              <span style={{ fontSize:14, fontWeight:700, color:C.faint, minWidth:24, textAlign:"right" }}>{pl.rank}</span>
-              <Avatar initials={pl.initials} idx={pl.coIdx} size={34}/>
-              <div style={{ flex:1 }}>
-                <div style={{ fontSize:13, fontWeight:700, color:NAVY }}>{pl.name}</div>
-                <div style={{ fontSize:11, color:C.faint }}>{pl.co}</div>
-              </div>
-              <Bar value={pl.score} max={pp.max} color={TEAL}/>
-              <div style={{ textAlign:"right", minWidth:90 }}>
-                <div style={{ fontSize:14, fontWeight:700, color:NAVY }}>{pl.score} pts</div>
-                <div style={{ fontSize:11, color:C.faint }}>{pp.sub(pl)}</div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
+  // User score = Sophie Martin (index 0) for current quiz
+  var userScore = 90;
 
   return (
     <div style={{ maxWidth:820, margin:"0 auto", padding:"48px 24px" }}>
@@ -534,8 +587,8 @@ function LeaderboardScreen() {
               </button>
             )}
           </div>
-          <Podium data={data} sub={function(pl){ return pl.correct+"/10 · "+pl.time+"s"; }}/>
-          <Rows data={data} max={MAX_PTS} sub={function(pl){ return pl.correct+"/10 · "+pl.time+"s"; }}/>
+
+          <ScoreDistribution data={data} maxScore={MAX_PTS} userScore={userScore} />
         </div>
       )}
 
@@ -554,8 +607,8 @@ function LeaderboardScreen() {
             <span style={{ color:C.faint }}>·</span>
             {QUARTERS[selQt].weeks.map(function(w){ return <Chip key={w} color={NAVY} bg={WHITE} border={C.border}>{w}</Chip>; })}
           </div>
-          <Podium data={qtData} sub={function(pl){ return pl.score+" pts · "+pl.played+" quiz"; }}/>
-          <Rows data={qtData} max={QUARTERS[selQt].weeks.length*MAX_PTS} sub={function(pl){ return pl.played+" quiz joués"; }}/>
+
+          <ScoreDistribution data={qtData} maxScore={QUARTERS[selQt].weeks.length*MAX_PTS} userScore={undefined} />
         </div>
       )}
 
@@ -571,8 +624,8 @@ function LeaderboardScreen() {
               {ALL_WEEKS.map(function(w){ return <Chip key={w} color={NAVY} bg={WHITE} border={C.border}>{w}</Chip>; })}
             </div>
           </div>
-          <Podium data={yearData} sub={function(pl){ return pl.score+" pts · "+pl.played+" quiz"; }}/>
-          <Rows data={yearData} max={ALL_WEEKS.length*MAX_PTS} sub={function(pl){ return pl.played+" quiz joués"; }}/>
+
+          <ScoreDistribution data={yearData} maxScore={ALL_WEEKS.length*MAX_PTS} userScore={undefined} />
         </div>
       )}
     </div>
@@ -769,10 +822,10 @@ function HomeScreen(p) {
         })}
       </div>
 
-      {/* NIVEAU PAR DOMAINE */}
+      {/* RÉUSSITE PAR DOMAINE — renamed */}
       <div style={{ background:WHITE, border:"1px solid "+C.border, borderRadius:16, overflow:"hidden", marginBottom:24, boxShadow:"0 2px 12px rgba(27,58,107,.06)" }}>
         <div style={{ padding:"18px 22px", borderBottom:"1px solid "+C.border }}>
-          <p style={{ fontSize:14, fontWeight:700, color:NAVY, margin:"0 0 2px", fontStyle:"italic" }}>Votre niveau par domaine</p>
+          <p style={{ fontSize:14, fontWeight:700, color:NAVY, margin:"0 0 2px", fontStyle:"italic" }}>Votre réussite par domaine</p>
           <p style={{ fontSize:12, color:C.faint, margin:0 }}>Basé sur vos derniers quiz</p>
         </div>
         <div style={{ padding:"20px 22px", display:"flex", flexDirection:"column", gap:16 }}>
