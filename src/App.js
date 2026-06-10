@@ -1,11 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-
 const NAVY  = "#1B3A6B";
 const TEAL  = "#4ECDC4";
 const TEAL2 = "#3DBDB4";
 const WHITE = "#FFFFFF";
 const GRAD  = "linear-gradient(135deg,#1B3A6B 0%,#2A5298 60%,#4ECDC4 100%)";
-
 const C = {
   bg:"#F5F7FA", surface:"#FFFFFF", border:"#E2E8F0", borderMed:"#CBD5E0",
   text:NAVY, muted:"#4A6280", faint:"#8FA3BC", accentFg:"#FFFFFF",
@@ -15,23 +13,19 @@ const C = {
   gold:"#92400E",  goldBg:"#FFFBEB",  goldBorder:"#FDE68A",
   teal:TEAL, tealBg:"#E6FAF9", tealBorder:"#9EEAE6",
 };
-
 const DOMAINS = [
   { id:"fiscal",      label:"Droit fiscal",      color:NAVY, bg:"#EBF4FF", border:"#BFD7FF" },
   { id:"social",      label:"Droit social",       color:NAVY, bg:"#E6FAF9", border:"#9EEAE6" },
   { id:"affaires",    label:"Droit des affaires", color:NAVY, bg:"#EBF4FF", border:"#BFD7FF" },
   { id:"patrimonial", label:"Droit patrimonial",  color:NAVY, bg:"#E6FAF9", border:"#9EEAE6" },
 ];
-
 const DOMAIN_SCORES = { fiscal:72, social:58, affaires:65, patrimonial:40 };
-
 const CABINET_SIZES = [
   { id:"xs", label:"— de 15 collaborateurs",  max:15       },
   { id:"sm", label:"— de 100 collaborateurs", max:100      },
   { id:"md", label:"— de 500 collaborateurs", max:500      },
   { id:"lg", label:"+ de 500 collaborateurs", max:Infinity },
 ];
-
 const RESOURCES = {
   tva2024:         { type:"webinaire", label:"TVA — Actualité 2024",                 date:"Jan. 2025", url:"#", domain:"fiscal",      description:"Tour d'horizon complet de l'actualité TVA : taux, exonérations, jurisprudence récente et cas pratiques." },
   rgpdGuide:       { type:"support",   label:"Guide pratique RGPD",                  date:"Fév. 2025", url:"#", domain:"social",      description:"Les obligations sociales en entreprise : registre de traitement, DPO, droits des personnes, sanctions." },
@@ -42,13 +36,11 @@ const RESOURCES = {
   csgActu:         { type:"webinaire", label:"Prélèvements sociaux — point d'étape", date:"Jan. 2025", url:"#", domain:"fiscal",      description:"Point d'étape sur les prélèvements sociaux : CSG, CRDS, taux applicables et assiettes de calcul." },
   successionGuide: { type:"support",   label:"Guide successions & donations",         date:"Oct. 2024", url:"#", domain:"patrimonial", description:"Les règles essentielles en matière de successions, donations et fiscalité du patrimoine." },
 };
-
 const TYPE_META = {
   webinaire: { color:NAVY, bg:"#EBF4FF", border:"#BFD7FF", icon:"▶", label:"Webinaire" },
   support:   { color:TEAL, bg:"#E6FAF9", border:"#9EEAE6", icon:"↓", label:"Support"   },
   panorama:  { color:NAVY, bg:"#EBF4FF", border:"#BFD7FF", icon:"◎", label:"Panorama"  },
 };
-
 const ACTIVE_Q = [
   { id:1,  text:"Quel est le taux de TVA standard en France ?",                                                        domain:"fiscal",      options:["18 %","19,6 %","20 %","21 %"],                                                                                        answer:2, points:10, explanation:"Le taux standard de TVA est de 20 % depuis le 1er janvier 2014.", resources:["tva2024"],         optionNotes:["N'a jamais existé en France.","Ancien taux jusqu'en 2013.","✓ Taux actuel.","Taux belge."] },
   { id:2,  text:"Quel impôt finance principalement la Sécurité sociale ?",                                              domain:"fiscal",      options:["IR","IS","CSG","TVA"],                                                                                                 answer:2, points:10, explanation:"La CSG est le premier prélèvement obligatoire français en volume.", resources:["csgActu"],         optionNotes:["Finance le budget de l'État.","Finance le budget de l'État.","✓ Créée en 1991.","Finance l'État et partiellement la Sécu."] },
@@ -61,9 +53,7 @@ const ACTIVE_Q = [
   { id:9,  text:"En droit des affaires, que désigne la notion de 'capital social' ?",                                   domain:"affaires",    options:["Les bénéfices de la société","Les apports des associés à la création","La valeur boursière de l'entreprise","Le chiffre d'affaires annuel"], answer:1, points:10, explanation:"Le capital social représente l'ensemble des apports réalisés par les associés lors de la constitution.", resources:["bilanTuto"], optionNotes:["Ce sont les résultats, pas le capital.","✓ Apports des associés à la création.","Valeur de marché, distincte du capital.","Indicateur d'activité."] },
   { id:10, text:"En droit patrimonial, quel est l'abattement fiscal applicable entre parents et enfants pour une donation ?", domain:"patrimonial", options:["50 000 €","80 000 €","100 000 €","150 000 €"], answer:2, points:10, explanation:"L'abattement entre parents et enfants est de 100 000 € par parent et par enfant, renouvelable tous les 15 ans.", resources:["successionGuide"], optionNotes:["Montant insuffisant.","Abattement grands-parents/petits-enfants.","✓ 100 000 € par parent/enfant, tous les 15 ans.","Abattement inexistant à ce niveau."] },
 ];
-
 const MAX_PTS = 100;
-
 const ALL_PLAYERS = [
   { name:"Sophie Martin",   co:"Nexia Paris",   coIdx:0, initials:"SM", cabinetSize:"sm" },
   { name:"Thomas Lebrun",   co:"EY France",     coIdx:1, initials:"TL", cabinetSize:"lg" },
@@ -76,11 +66,9 @@ const ALL_PLAYERS = [
   { name:"Emma Blanchard",  co:"BDO France",    coIdx:4, initials:"EB", cabinetSize:"md" },
   { name:"Lucas Girard",    co:"Cab. Duval",    coIdx:3, initials:"LG", cabinetSize:"xs" },
 ];
-
 const QUIZ_SCORES  = { "S.12":[90,80,100,70,90,60,80,100,70,60], "S.11":[80,70,90,60,80,50,70,80,90,50], "S.10":[70,90,80,80,60,90,60,70,60,80], "S.9":[100,60,70,90,70,80,50,60,80,70], "S.8":[80,80,60,100,50,70,90,80,50,90], "S.7":[60,100,80,70,60,80,50,90,70,80] };
 const QUIZ_TIMES   = [42,55,38,61,44,70,88,35,67,78];
 const QUIZ_CORRECT = [9,8,10,7,9,6,8,10,7,6];
-
 function buildQuizRanking(week, sz) {
   var sc = QUIZ_SCORES[week] || QUIZ_SCORES["S.12"];
   var pl = sz && sz !== "all" ? ALL_PLAYERS.filter(function(p){ return p.cabinetSize === sz; }) : ALL_PLAYERS;
@@ -89,7 +77,6 @@ function buildQuizRanking(week, sz) {
     .sort(function(a,b){ return b.correct !== a.correct ? b.correct - a.correct : a.time - b.time; })
     .map(function(p,i){ return Object.assign({}, p, { rank:i+1 }); });
 }
-
 function buildPeriodRanking(weeks, sz) {
   var pl = sz && sz !== "all" ? ALL_PLAYERS.filter(function(p){ return p.cabinetSize === sz; }) : ALL_PLAYERS;
   return pl
@@ -97,12 +84,10 @@ function buildPeriodRanking(weeks, sz) {
     .sort(function(a,b){ return b.score - a.score || b.correct - a.correct; })
     .map(function(p,i){ return Object.assign({}, p, { rank:i+1 }); });
 }
-
 const coColors = [NAVY, "#2A5298", "#1A7A74", "#2C4770", "#1B5E56"];
 const coLight  = ["#EBF4FF","#EBF0FA","#E6FAF9","#E8EFF8","#E6F5F3"];
 const fmt      = function(t){ return String(Math.floor(t/60)).padStart(2,"0") + ":" + String(t%60).padStart(2,"0"); };
 const domainOf = function(id){ return DOMAINS.find(function(d){ return d.id === id; }) || DOMAINS[0]; };
-
 const css = `
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
@@ -111,32 +96,24 @@ const css = `
 .ob:hover:not(:disabled){border-color:#1B3A6B !important;background:#EBF4FF !important}
 .nb:hover{background:#EBF4FF !important}
 `;
-
-// ── ATOMS ─────────────────────────────────────────────────────────────────
-
 function Chip(p) {
   return <span style={Object.assign({ fontSize:11, fontWeight:600, letterSpacing:"0.05em", textTransform:"uppercase", padding:"4px 10px", borderRadius:20, background:p.bg||C.sand, color:p.color||C.muted, border:"1px solid "+(p.border||C.border) }, p.style||{})}>{p.children}</span>;
 }
-
 function Avatar(p) {
   var s = p.size || 32;
   return <div style={{ width:s, height:s, borderRadius:"50%", background:coLight[p.idx%5], border:"2px solid "+coColors[p.idx%5]+"50", display:"flex", alignItems:"center", justifyContent:"center", fontSize:Math.round(s*.33), fontWeight:700, color:coColors[p.idx%5], flexShrink:0 }}>{p.initials}</div>;
 }
-
 function Bar(p) {
   var h = p.h || 4;
   return <div style={{ flex:1, height:h, borderRadius:h, background:"#E2E8F0", overflow:"hidden" }}><div style={{ height:"100%", borderRadius:h, background:p.color||TEAL, width:Math.round(p.value/p.max*100)+"%", transition:"width 0.7s ease" }}/></div>;
 }
-
 function DTag(p) {
   var d = domainOf(p.id);
   return <Chip color={d.color} bg={d.bg} border={d.border}>{d.label}</Chip>;
 }
-
 function TealBtn(p) {
   return <button onClick={p.onClick} disabled={p.disabled} style={Object.assign({ padding:"11px 28px", borderRadius:30, border:"none", background:TEAL, color:WHITE, fontSize:14, fontWeight:700, cursor:p.disabled?"not-allowed":"pointer", letterSpacing:"0.02em", transition:"opacity .2s", opacity:p.disabled?.6:1 }, p.style||{})}>{p.children}</button>;
 }
-
 function ResLinks(p) {
   var keys = p.keys || [];
   if(!keys.length) return null;
@@ -162,7 +139,6 @@ function ResLinks(p) {
     </div>
   );
 }
-
 function ExplCard(p) {
   var openSt = useState(false); var isOpen = openSt[0]; var setOpen = openSt[1];
   var q = p.question, ua = p.userAnswer, correct = q.answer;
@@ -202,9 +178,7 @@ function ExplCard(p) {
     </div>
   );
 }
-
 // ── QUIZ ──────────────────────────────────────────────────────────────────
-
 function QuizScreen(p) {
   var phaseSt  = useState("intro"); var phase   = phaseSt[0];   var setPhase   = phaseSt[1];
   var qIdxSt   = useState(0);       var qIdx    = qIdxSt[0];    var setQIdx    = qIdxSt[1];
@@ -214,15 +188,12 @@ function QuizScreen(p) {
   var elSt     = useState(0);       var elapsed = elSt[0];      var setElapsed = elSt[1];
   var ansSt    = useState([]);      var answers = ansSt[0];     var setAnswers = ansSt[1];
   var timer = useRef(null);
-
   useEffect(function(){
     if(phase === "playing") timer.current = setInterval(function(){ setElapsed(function(e){ return e+1; }); }, 1000);
     return function(){ clearInterval(timer.current); };
   }, [phase]);
-
   var q = ACTIVE_Q[qIdx], total = ACTIVE_Q.length;
   var correctCount = answers.filter(function(a){ return a.correct; }).length;
-
   function pick(i){
     if(rev) return;
     setSel(i); setRev(true);
@@ -234,7 +205,6 @@ function QuizScreen(p) {
     if(qIdx+1 < total){ setQIdx(function(n){ return n+1; }); setSel(null); setRev(false); }
     else{ clearInterval(timer.current); setPhase("result"); }
   }
-
   if(phase === "intro") return (
     <div style={{ maxWidth:620, margin:"0 auto", padding:"60px 24px" }} className="fu">
       <div style={{ textAlign:"center", marginBottom:40 }}>
@@ -271,7 +241,6 @@ function QuizScreen(p) {
       </div>
     </div>
   );
-
   if(phase === "result"){
     var pct = Math.round(score/MAX_PTS*100);
     var cCount = answers.filter(function(a){ return a.correct; }).length;
@@ -320,7 +289,6 @@ function QuizScreen(p) {
       </div>
     );
   }
-
   return (
     <div style={{ maxWidth:640, margin:"0 auto", padding:"36px 24px" }} className="fu">
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
@@ -377,120 +345,44 @@ function QuizScreen(p) {
     </div>
   );
 }
-
-// ── SCORE DISTRIBUTION WIDGET ─────────────────────────────────────────────
-
-function ScoreDistribution({ data, maxScore, userScore }) {
-  // Build brackets
-  var brackets = [
-    { label:"0 – 39 pts",  min:0,   max:39,  color:"#FECACA", textColor:C.red,   bg:"#FEF2F2",  border:"#FECACA" },
-    { label:"40 – 59 pts", min:40,  max:59,  color:"#FDE68A", textColor:C.gold,  bg:C.goldBg,   border:C.goldBorder },
-    { label:"60 – 79 pts", min:60,  max:79,  color:TEAL+"80", textColor:"#0D6B63", bg:C.tealBg, border:C.tealBorder },
-    { label:"80 – 100 pts",min:80,  max:100, color:C.green,   textColor:C.green,  bg:C.greenBg,  border:C.greenBorder },
-  ];
-
-  var total = data.length;
-  brackets = brackets.map(function(b){
-    var inBracket = data.filter(function(p){ return p.score >= b.min && p.score <= b.max; });
-    var pct = total > 0 ? Math.round(inBracket.length / total * 100) : 0;
-    var userIn = userScore !== undefined && userScore >= b.min && userScore <= b.max;
-    return Object.assign({}, b, { count:inBracket.length, pct:pct, userIn:userIn });
-  });
-
-  var userBracket = brackets.find(function(b){ return b.userIn; });
-
+// ── RANK TABLE ─────────────────────────────────────────────────────────────
+function RankTable({ data, maxPts, label }) {
   return (
-    <div style={{ background:WHITE, border:"1px solid "+C.border, borderRadius:16, overflow:"hidden", marginBottom:28, boxShadow:"0 2px 12px rgba(27,58,107,.06)" }}>
-      <div style={{ padding:"18px 22px", borderBottom:"1px solid "+C.border, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-        <div>
-          <p style={{ fontSize:14, fontWeight:700, color:NAVY, margin:"0 0 2px", fontStyle:"italic" }}>Distribution des scores</p>
-          <p style={{ fontSize:12, color:C.faint, margin:0 }}>{total} participant{total>1?"s":""} · semaine en cours</p>
-        </div>
-        {userBracket && (
-          <div style={{ padding:"8px 16px", borderRadius:30, background:userBracket.bg, border:"1px solid "+userBracket.border }}>
-            <span style={{ fontSize:12, fontWeight:700, color:userBracket.textColor }}>Vous êtes dans la tranche {userBracket.label}</span>
-          </div>
-        )}
+    <div style={{ background:WHITE, border:"1px solid "+C.border, borderRadius:16, overflow:"hidden", boxShadow:"0 2px 12px rgba(27,58,107,.06)" }}>
+      <div style={{ padding:"16px 22px", borderBottom:"1px solid "+C.border, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+        <span style={{ fontSize:14, fontWeight:700, color:NAVY, fontStyle:"italic" }}>{label}</span>
+        <span style={{ fontSize:12, color:C.faint }}>sur {maxPts} points</span>
       </div>
-
-      {/* Visual bar chart */}
-      <div style={{ padding:"22px 22px 8px" }}>
-        <div style={{ display:"flex", alignItems:"flex-end", gap:10, height:80, marginBottom:10 }}>
-          {brackets.map(function(b, i){
-            var barH = b.pct > 0 ? Math.max(8, Math.round(b.pct / 100 * 72)) : 4;
-            return (
-              <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
-                <span style={{ fontSize:11, fontWeight:700, color:b.userIn?b.textColor:C.faint }}>{b.pct}%</span>
-                <div style={{
-                  width:"100%", height:barH, borderRadius:"4px 4px 0 0",
-                  background:b.userIn?b.textColor:b.color,
-                  border:"1px solid "+(b.userIn?b.textColor:b.border),
-                  transition:"height .6s ease",
-                  position:"relative",
-                  boxShadow:b.userIn?"0 2px 8px "+b.textColor+"40":"none"
-                }}>
-                  {b.userIn && (
-                    <div style={{ position:"absolute", top:-22, left:"50%", transform:"translateX(-50%)", background:b.textColor, color:WHITE, fontSize:9, fontWeight:700, padding:"2px 6px", borderRadius:4, whiteSpace:"nowrap" }}>
-                      vous
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <div style={{ height:1, background:C.border, marginBottom:10 }}/>
-      </div>
-
-      {/* Bracket rows */}
-      <div style={{ padding:"0 22px 20px", display:"flex", flexDirection:"column", gap:8 }}>
-        {brackets.map(function(b, i){
-          return (
-            <div key={i} style={{
-              display:"flex", alignItems:"center", gap:14, padding:"10px 14px", borderRadius:10,
-              background:b.userIn?b.bg:"transparent",
-              border:"1px solid "+(b.userIn?b.border:"transparent"),
-              transition:"background .2s"
-            }}>
-              <div style={{ width:10, height:10, borderRadius:2, background:b.userIn?b.textColor:b.color, flexShrink:0 }}/>
-              <span style={{ fontSize:13, fontWeight:b.userIn?700:400, color:b.userIn?b.textColor:NAVY, flex:1 }}>{b.label}</span>
-              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                <div style={{ width:80, height:5, borderRadius:3, background:C.border, overflow:"hidden" }}>
-                  <div style={{ height:"100%", borderRadius:3, background:b.userIn?b.textColor:b.color, width:b.pct+"%", transition:"width .7s ease" }}/>
-                </div>
-                <span style={{ fontSize:12, fontWeight:600, color:b.userIn?b.textColor:C.muted, minWidth:32, textAlign:"right" }}>{b.pct}%</span>
-                <span style={{ fontSize:11, color:C.faint, minWidth:60, textAlign:"right" }}>{b.count} participant{b.count>1?"s":""}</span>
-                {b.userIn && <Chip color={b.textColor} bg={b.bg} border={b.border} style={{ fontSize:10, padding:"2px 8px" }}>Votre tranche</Chip>}
-              </div>
+      {data.map(function(pl, i){
+        return (
+          <div key={pl.initials+i} className="rh" style={{ display:"flex", alignItems:"center", gap:14, padding:"13px 22px", borderBottom:i<data.length-1?"1px solid "+C.border:"none" }}>
+            <span style={{ fontSize:14, fontWeight:700, color:pl.rank<=3?TEAL:C.faint, minWidth:24 }}>{pl.rank}</span>
+            <Avatar initials={pl.initials} idx={pl.coIdx} size={34}/>
+            <div style={{ flex:1 }}>
+              <div style={{ fontSize:13, fontWeight:700, color:NAVY }}>{pl.name}</div>
+              <div style={{ fontSize:11, color:C.faint }}>{pl.co}</div>
             </div>
-          );
-        })}
-      </div>
-
-      {/* Bottom context */}
-      <div style={{ margin:"0 22px 20px", padding:"12px 16px", borderRadius:10, background:C.sand, border:"1px solid "+C.border }}>
-        <p style={{ fontSize:12, color:C.muted, margin:0, lineHeight:1.6 }}>
-          <strong style={{ color:NAVY }}>Lecture :</strong> chaque tranche regroupe les participants ayant obtenu ce score sur 100 points. En cas d'égalité, le classement final est déterminé par le nombre de bonnes réponses puis par le temps.
-        </p>
-      </div>
+            <Bar value={pl.score} max={maxPts} color={TEAL}/>
+            <div style={{ textAlign:"right", minWidth:80 }}>
+              <div style={{ fontSize:14, fontWeight:700, color:NAVY }}>{pl.score} pts</div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
-
 // ── LEADERBOARD ───────────────────────────────────────────────────────────
-
 function LeaderboardScreen() {
-  var viewSt  = useState("quiz");    var view    = viewSt[0];    var setView    = viewSt[1];
+  var viewSt  = useState("quiz");   var view    = viewSt[0];    var setView    = viewSt[1];
   var scopeSt = useState("global"); var scope   = scopeSt[0];   var setScope   = scopeSt[1];
   var sizeSt  = useState("xs");     var selSize = sizeSt[0];    var setSelSize = sizeSt[1];
-  var quizSt  = useState("S.12");   var selQuiz = quizSt[0];    var setSelQuiz = quizSt[1];
   var qtSt    = useState("T2");     var selQt   = qtSt[0];      var setSelQt   = qtSt[1];
   var liveSt  = useState(true);     var live    = liveSt[0];    var setLive    = liveSt[1];
   var dataSt  = useState(function(){ return buildQuizRanking("S.12", null); });
   var data    = dataSt[0]; var setData = dataSt[1];
   var tick    = useRef(null);
   var sf      = scope === "cabinet" ? selSize : null;
-
   useEffect(function(){
     clearInterval(tick.current);
     if(view !== "quiz" || !live) return;
@@ -502,31 +394,29 @@ function LeaderboardScreen() {
     }, 3500);
     return function(){ clearInterval(tick.current); };
   }, [view, live]);
-
-  useEffect(function(){ setData(buildQuizRanking(selQuiz, sf)); }, [selQuiz, scope, selSize]);
-
+  useEffect(function(){ setData(buildQuizRanking("S.12", sf)); }, [scope, selSize]);
   var QUARTERS = {
     "T1":{ label:"T1 — Jan · Fév · Mars", weeks:["S.7","S.8","S.9"] },
     "T2":{ label:"T2 — Avr · Mai · Juin", weeks:["S.10","S.11","S.12"] },
   };
-  var QUIZ_LIST = ["S.12","S.11","S.10","S.9","S.8","S.7"];
   var ALL_WEEKS = ["S.7","S.8","S.9","S.10","S.11","S.12"];
-  var qtData   = buildPeriodRanking(QUARTERS[selQt].weeks, sf);
-  var yearData = buildPeriodRanking(ALL_WEEKS, sf);
-
-  // User score = Sophie Martin (index 0) for current quiz
-  var userScore = 90;
-
+  var qtData     = buildPeriodRanking(QUARTERS[selQt].weeks, sf);
+  var yearData   = buildPeriodRanking(ALL_WEEKS, sf);
+  var qtMaxPts   = QUARTERS[selQt].weeks.length * MAX_PTS;
+  var yearMaxPts = ALL_WEEKS.length * MAX_PTS;
   return (
     <div style={{ maxWidth:820, margin:"0 auto", padding:"48px 24px" }}>
       <div style={{ textAlign:"center", marginBottom:36 }}>
         <h2 style={{ fontSize:30, fontWeight:800, fontStyle:"italic", color:NAVY, margin:"0 0 8px" }}>Classement</h2>
         <p style={{ fontSize:14, color:C.muted, margin:0 }}>Départage par bonnes réponses, puis par temps de réponse</p>
       </div>
-
       {/* SÉLECTEUR PÉRIODE */}
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:1, background:C.border, borderRadius:16, overflow:"hidden", marginBottom:24, boxShadow:"0 2px 12px rgba(27,58,107,.06)" }}>
-        {[["quiz","Par quiz","Semaine par semaine"],["quarter","Par trimestre","Cumul sur 3 mois"],["year","Par année","Cumul annuel 2025"]].map(function(it){
+        {[
+          ["quiz",    "Quiz en cours",  "Semaine en cours · 10 pts"],
+          ["quarter", "Par trimestre",  "Points cumulés sur 3 mois"],
+          ["year",    "Par année",      "Points cumulés 2025"],
+        ].map(function(it){
           var active = view===it[0];
           return (
             <button key={it[0]} onClick={function(){ setView(it[0]); }}
@@ -537,7 +427,6 @@ function LeaderboardScreen() {
           );
         })}
       </div>
-
       {/* SÉLECTEUR SCOPE */}
       <div style={{ display:"flex", gap:10, marginBottom:16, flexWrap:"wrap", alignItems:"center" }}>
         <div style={{ display:"flex", gap:2, background:C.sand, padding:3, borderRadius:30 }}>
@@ -552,8 +441,6 @@ function LeaderboardScreen() {
           })}
         </div>
       </div>
-
-      {/* SÉLECTEUR TAILLE */}
       {scope === "cabinet" && (
         <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginBottom:20 }}>
           {CABINET_SIZES.map(function(sz){
@@ -567,32 +454,23 @@ function LeaderboardScreen() {
           })}
         </div>
       )}
-
-      {/* VUE QUIZ */}
+      {/* VUE QUIZ EN COURS — sur 10 pts */}
       {view === "quiz" && (
         <div>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20, flexWrap:"wrap", gap:10 }}>
-            <div style={{ display:"flex", gap:2, background:C.sand, padding:3, borderRadius:30 }}>
-              {QUIZ_LIST.map(function(q){
-                var a = selQuiz===q;
-                return <button key={q} onClick={function(){ setSelQuiz(q); setLive(q==="S.12"); }}
-                  style={{ padding:"7px 16px", borderRadius:28, border:"none", cursor:"pointer", fontSize:13, fontWeight:a?700:400, background:a?NAVY:"transparent", color:a?WHITE:C.muted, transition:"all .2s" }}>{q}</button>;
-              })}
+            <div style={{ padding:"10px 18px", borderRadius:10, background:C.tealBg, border:"1px solid "+C.tealBorder, display:"flex", alignItems:"center", gap:10 }}>
+              <span style={{ fontSize:13, fontWeight:700, color:NAVY }}>Quiz Semaine 12 — classement sur 10 points</span>
             </div>
-            {selQuiz === "S.12" && (
-              <button onClick={function(){ setLive(function(v){ return !v; }); }}
-                style={{ padding:"7px 18px", borderRadius:30, border:"2px solid "+(live?TEAL:C.border), background:live?C.tealBg:WHITE, color:live?TEAL:C.muted, fontSize:12, fontWeight:600, cursor:"pointer", display:"flex", alignItems:"center", gap:8 }}>
-                <span style={{ width:7, height:7, borderRadius:"50%", background:live?TEAL:C.faint, display:"inline-block", animation:live?"pulse 1.5s infinite":"none" }}/>
-                {live?"En direct":"Pause"}
-              </button>
-            )}
+            <button onClick={function(){ setLive(function(v){ return !v; }); }}
+              style={{ padding:"7px 18px", borderRadius:30, border:"2px solid "+(live?TEAL:C.border), background:live?C.tealBg:WHITE, color:live?TEAL:C.muted, fontSize:12, fontWeight:600, cursor:"pointer", display:"flex", alignItems:"center", gap:8 }}>
+              <span style={{ width:7, height:7, borderRadius:"50%", background:live?TEAL:C.faint, display:"inline-block", animation:live?"pulse 1.5s infinite":"none" }}/>
+              {live?"En direct":"Pause"}
+            </button>
           </div>
-
-          <ScoreDistribution data={data} maxScore={MAX_PTS} userScore={userScore} />
+          <RankTable data={data} maxPts={10} label="Classement du quiz en cours"/>
         </div>
       )}
-
-      {/* VUE TRIMESTRE */}
+      {/* VUE TRIMESTRE — points cumulés */}
       {view === "quarter" && (
         <div>
           <div style={{ display:"flex", gap:2, background:C.sand, padding:3, borderRadius:30, marginBottom:16, width:"fit-content" }}>
@@ -606,34 +484,30 @@ function LeaderboardScreen() {
             <span style={{ fontSize:13, fontWeight:700, color:NAVY }}>{QUARTERS[selQt].label}</span>
             <span style={{ color:C.faint }}>·</span>
             {QUARTERS[selQt].weeks.map(function(w){ return <Chip key={w} color={NAVY} bg={WHITE} border={C.border}>{w}</Chip>; })}
+            <span style={{ fontSize:12, color:C.muted, marginLeft:4 }}>{QUARTERS[selQt].weeks.length} quiz · {qtMaxPts} pts cumulés</span>
           </div>
-
-          <ScoreDistribution data={qtData} maxScore={QUARTERS[selQt].weeks.length*MAX_PTS} userScore={undefined} />
+          <RankTable data={qtData} maxPts={qtMaxPts} label={"Classement "+QUARTERS[selQt].label}/>
         </div>
       )}
-
-      {/* VUE ANNUELLE */}
+      {/* VUE ANNUELLE — points cumulés */}
       {view === "year" && (
         <div>
           <div style={{ padding:"12px 18px", borderRadius:10, background:C.tealBg, border:"1px solid "+C.tealBorder, marginBottom:20, display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:8 }}>
             <div>
               <span style={{ fontSize:14, fontWeight:700, color:NAVY }}>Année 2025</span>
-              <span style={{ fontSize:13, color:C.muted, marginLeft:10 }}>{ALL_WEEKS.length} quiz · {ALL_WEEKS.length*MAX_PTS} pts maximum</span>
+              <span style={{ fontSize:13, color:C.muted, marginLeft:10 }}>{ALL_WEEKS.length} quiz · {yearMaxPts} pts cumulés</span>
             </div>
             <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
               {ALL_WEEKS.map(function(w){ return <Chip key={w} color={NAVY} bg={WHITE} border={C.border}>{w}</Chip>; })}
             </div>
           </div>
-
-          <ScoreDistribution data={yearData} maxScore={ALL_WEEKS.length*MAX_PTS} userScore={undefined} />
+          <RankTable data={yearData} maxPts={yearMaxPts} label="Classement annuel 2025"/>
         </div>
       )}
     </div>
   );
 }
-
 // ── HISTORY ───────────────────────────────────────────────────────────────
-
 function HistoryScreen() {
   var oqSt  = useState(null); var openQuiz = oqSt[0];  var setOpenQuiz = oqSt[1];
   var oqSt2 = useState(null); var openQ    = oqSt2[0]; var setOpenQ    = oqSt2[1];
@@ -716,9 +590,7 @@ function HistoryScreen() {
     </div>
   );
 }
-
 // ── RESOURCES ─────────────────────────────────────────────────────────────
-
 function ResourcesScreen() {
   var tfSt = useState("all"); var typeFilter = tfSt[0]; var setTypeFilter = tfSt[1];
   var srSt = useState("");    var search     = srSt[0]; var setSearch     = srSt[1];
@@ -732,7 +604,6 @@ function ResourcesScreen() {
   DOMAINS.forEach(function(d){ grouped[d.id] = []; });
   filtered.forEach(function(r){ if(grouped[r.domain]) grouped[r.domain].push(r); });
   var hasAny = DOMAINS.some(function(d){ return grouped[d.id] && grouped[d.id].length>0; });
-
   function RCard(r){
     var tm = TYPE_META[r.type];
     return (
@@ -750,7 +621,6 @@ function ResourcesScreen() {
       </a>
     );
   }
-
   return (
     <div style={{ maxWidth:920, margin:"0 auto", padding:"48px 24px" }}>
       <div style={{ textAlign:"center", marginBottom:36 }}>
@@ -791,14 +661,10 @@ function ResourcesScreen() {
     </div>
   );
 }
-
-// ── HOME ──────────────────────────────────────────────────────────────────
-
+// ── HOME — modifiée ───────────────────────────────────────────────────────
 function HomeScreen(p) {
-  var top3 = buildQuizRanking("S.12", null).slice(0,3);
   return (
     <div style={{ maxWidth:820, margin:"0 auto", padding:"48px 24px" }}>
-
       {/* HERO */}
       <div style={{ background:GRAD, borderRadius:20, padding:"40px 40px", marginBottom:32, color:WHITE, position:"relative", overflow:"hidden" }}>
         <div style={{ position:"relative", zIndex:1 }}>
@@ -810,10 +676,12 @@ function HomeScreen(p) {
             : <Chip color={C.green} bg={C.greenBg} border={C.greenBorder}>Quiz complété ✓</Chip>}
         </div>
       </div>
-
-      {/* STATS */}
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:1, background:C.border, borderRadius:16, overflow:"hidden", marginBottom:28, boxShadow:"0 2px 12px rgba(27,58,107,.06)" }}>
-        {[["3e","Votre classement","sur 156 participants"],["90 pts","Cette semaine","9/10 bonnes réponses"],["Top 15 %","Votre cabinet","— de 100 collaborateurs"]].map(function(it){
+      {/* STATS — 2 colonnes, sans classement perso ni top cabinet */}
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:1, background:C.border, borderRadius:16, overflow:"hidden", marginBottom:28, boxShadow:"0 2px 12px rgba(27,58,107,.06)" }}>
+        {[
+          ["90 pts",      "Cette semaine",      "9/10 bonnes réponses"],
+          ["Terminé en 42s","Temps de réponse",  "Quiz Semaine 12"],
+        ].map(function(it){
           return <div key={it[0]} style={{ background:WHITE, padding:"20px 22px" }}>
             <div style={{ fontSize:24, fontWeight:800, color:NAVY }}>{it[0]}</div>
             <div style={{ fontSize:13, fontWeight:700, color:TEAL, marginTop:3 }}>{it[1]}</div>
@@ -821,9 +689,8 @@ function HomeScreen(p) {
           </div>;
         })}
       </div>
-
-      {/* RÉUSSITE PAR DOMAINE — renamed */}
-      <div style={{ background:WHITE, border:"1px solid "+C.border, borderRadius:16, overflow:"hidden", marginBottom:24, boxShadow:"0 2px 12px rgba(27,58,107,.06)" }}>
+      {/* RÉUSSITE PAR DOMAINE */}
+      <div style={{ background:WHITE, border:"1px solid "+C.border, borderRadius:16, overflow:"hidden", boxShadow:"0 2px 12px rgba(27,58,107,.06)" }}>
         <div style={{ padding:"18px 22px", borderBottom:"1px solid "+C.border }}>
           <p style={{ fontSize:14, fontWeight:700, color:NAVY, margin:"0 0 2px", fontStyle:"italic" }}>Votre réussite par domaine</p>
           <p style={{ fontSize:12, color:C.faint, margin:0 }}>Basé sur vos derniers quiz</p>
@@ -850,46 +717,17 @@ function HomeScreen(p) {
           })}
         </div>
       </div>
-
-      {/* TOP 3 */}
-      <div style={{ background:WHITE, border:"1px solid "+C.border, borderRadius:16, overflow:"hidden", boxShadow:"0 2px 12px rgba(27,58,107,.06)" }}>
-        <div style={{ padding:"16px 22px", borderBottom:"1px solid "+C.border, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-          <span style={{ fontSize:14, fontWeight:700, color:NAVY, fontStyle:"italic" }}>Top 3 · Semaine 12</span>
-          <span style={{ fontSize:11, color:C.faint, letterSpacing:"0.05em", textTransform:"uppercase" }}>Bonnes rép. + temps</span>
-        </div>
-        {top3.map(function(pl,i){
-          return (
-            <div key={pl.initials} style={{ display:"flex", alignItems:"center", gap:14, padding:"14px 22px", borderBottom:i<2?"1px solid "+C.border:"none" }}>
-              <span style={{ fontSize:14, fontWeight:700, color:TEAL, minWidth:20 }}>{pl.rank}</span>
-              <Avatar initials={pl.initials} idx={pl.coIdx} size={36}/>
-              <div style={{ flex:1 }}>
-                <div style={{ fontSize:13, fontWeight:700, color:NAVY }}>{pl.name}</div>
-                <div style={{ fontSize:11, color:C.faint }}>{pl.co}</div>
-              </div>
-              <Bar value={pl.score} max={MAX_PTS} color={TEAL}/>
-              <div style={{ textAlign:"right", minWidth:100 }}>
-                <div style={{ fontSize:14, fontWeight:700, color:NAVY }}>{pl.score} pts</div>
-                <div style={{ fontSize:11, color:C.faint }}>{pl.correct}/10 · {pl.time}s</div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 }
-
 // ── APP ───────────────────────────────────────────────────────────────────
-
 export default function App() {
   var screenSt = useState("home"); var screen = screenSt[0]; var setScreen = screenSt[1];
   var doneSt   = useState(false);  var done   = doneSt[0];   var setDone   = doneSt[1];
   var nav = [["home","Accueil"],["quiz","Quiz",!done],["leaderboard","Classement"],["history","Historique"],["resources","Ressources"]];
-
   return (
     <div style={{ minHeight:"100vh", background:C.bg, color:NAVY, fontFamily:"-apple-system,'Inter',sans-serif" }}>
       <style>{css}</style>
-      {/* NAVBAR */}
       <div style={{ background:NAVY, padding:"0 32px", display:"flex", alignItems:"center", justifyContent:"space-between", height:58, position:"sticky", top:0, zIndex:100 }}>
         <span style={{ fontSize:16, fontWeight:800, fontStyle:"italic", color:WHITE, letterSpacing:"-0.3px" }}>
           Quiz<span style={{ color:TEAL }}>WebLex</span>
@@ -909,7 +747,6 @@ export default function App() {
         </div>
         <div style={{ width:32, height:32, borderRadius:"50%", background:TEAL, display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, fontWeight:700, color:NAVY }}>MG</div>
       </div>
-
       {screen==="home"        && <HomeScreen onPlay={function(){ setScreen("quiz"); }} done={done}/>}
       {screen==="quiz"        && <QuizScreen onDone={function(){ setDone(true); setScreen("leaderboard"); }}/>}
       {screen==="leaderboard" && <LeaderboardScreen/>}
